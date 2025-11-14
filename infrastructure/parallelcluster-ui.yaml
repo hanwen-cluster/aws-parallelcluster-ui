@@ -231,7 +231,7 @@ Resources:
             - NonDefaultVpc
             - !Ref ImageBuilderVpcId
             - !Ref AWS::NoValue
-      TemplateURL: !Sub https://${AWS::Region}-aws-parallelcluster.s3.${AWS::Region}.amazonaws.com/parallelcluster/${Version}/api/parallelcluster-api.yaml
+      TemplateURL: !Sub https://${AWS::Region}-aws-parallelcluster.s3.${AWS::Region}.amazonaws.com/parallelcluster/${Version}/api/parallelcluster-api-with-lambda-runtime-python-312.yaml
       TimeoutInMinutes: 30
 
   ParallelClusterUIFun:
