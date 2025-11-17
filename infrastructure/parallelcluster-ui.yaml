@@ -170,6 +170,11 @@ Conditions:
       - !Equals ['3', !Select [ 1, !Split ['.', !Ref Version] ] ]
       - !Equals ['4', !Select [ 1, !Split ['.', !Ref Version] ] ]
       - !Equals ['5', !Select [ 1, !Split ['.', !Ref Version] ] ]
+  UseLambdaPython312Patch: !And
+    - !Equals [ '3', !Select [ 0, !Split [ '.', !Ref Version ] ] ] # Check PC version major is 3 and PC version minor is 0-5
+    - !Or
+      - !Equals [ '12', !Select [ 1, !Split [ '.', !Ref Version ] ] ]
+      - !Equals [ '13', !Select [ 1, !Split [ '.', !Ref Version ] ] ]
   InGovCloud: !Equals ['us-gov-west-1', !Ref "AWS::Region"]
   UsePermissionBoundary: !Not [!Equals [!Ref PermissionsBoundaryPolicy, '']]
   UsePermissionBoundaryPCAPI: !Not [!Equals [!Ref PermissionsBoundaryPolicyPCAPI, '']]
@@ -213,7 +218,10 @@ Resources:
         PermissionsBoundaryPolicy: !If [ UsePermissionBoundaryPCAPI, !Ref PermissionsBoundaryPolicyPCAPI, !Ref AWS::NoValue ]
         IAMRoleAndPolicyPrefix: !If [ UseIAMRoleAndPolicyPrefix, !Ref IAMRoleAndPolicyPrefix, !Ref AWS::NoValue ]
         ParallelClusterFunctionAdditionalPolicies: !If [ UseAdditionalPoliciesPCAPI, !Ref AdditionalPoliciesPCAPI, !Ref AWS::NoValue ]
-        ApiDefinitionS3Uri: !Sub s3://${AWS::Region}-aws-parallelcluster/parallelcluster/${Version}/api/ParallelCluster.openapi.yaml
+        ApiDefinitionS3Uri: !If
+          - UseLambdaPython312Patch
+          - !Sub s3://${AWS::Region}-aws-parallelcluster/parallelcluster/${Version}.1/api/ParallelCluster.openapi.yaml
+          - !Sub s3://${AWS::Region}-aws-parallelcluster/parallelcluster/${Version}/api/ParallelCluster.openapi.yaml
         CreateApiUserRole: False
         EnableIamAdminAccess: True
         VpcEndpointId: !If [ IsPrivate, !Ref VpcEndpointId, !Ref AWS::NoValue ]
@@ -231,7 +239,10 @@ Resources:
             - NonDefaultVpc
             - !Ref ImageBuilderVpcId
             - !Ref AWS::NoValue
-      TemplateURL: !Sub https://${AWS::Region}-aws-parallelcluster.s3.${AWS::Region}.amazonaws.com/parallelcluster/${Version}/api/parallelcluster-api.yaml
+      TemplateURL: !If
+        - UseLambdaPython312Patch
+        - !Sub https://${AWS::Region}-aws-parallelcluster.s3.${AWS::Region}.amazonaws.com/parallelcluster/${Version}.1/api/parallelcluster-api.yaml
+        - !Sub https://${AWS::Region}-aws-parallelcluster.s3.${AWS::Region}.amazonaws.com/parallelcluster/${Version}/api/parallelcluster-api.yaml
       TimeoutInMinutes: 30
 
   ParallelClusterUIFun:
